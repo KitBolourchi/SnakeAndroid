@@ -1,1 +1,1 @@
-test
+This is an Android game of Snake, developed in Android Studio.
