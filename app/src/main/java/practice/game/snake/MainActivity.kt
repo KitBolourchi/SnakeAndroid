@@ -54,14 +54,20 @@ class Game(scope: CoroutineScope) {
                 mutableState.update {
                     val newPosition = it.snake.first().let { pos ->
                         Pair(
-                            pos.first + move.first,
-                            pos.second + move.second
+                            (pos.first + move.first + BOARD_SIZE) % BOARD_SIZE,
+                            (pos.second + move.second + BOARD_SIZE) % BOARD_SIZE
                         )
                     }
-                    it.copy()
+                    it.copy(
+                        snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
+                    )
                 }
             }
         }
+    }
+
+    companion object {
+        const val BOARD_SIZE = 16
     }
 }
 
