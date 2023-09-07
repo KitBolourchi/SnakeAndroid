@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import practice.game.snake.ui.theme.SnakeTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +40,21 @@ class MainActivity : ComponentActivity() {
 
 data class State(val food: Pair<Int, Int>, val snake: List<Pair<Int, Int>>)
 
-class Game(scope: CoroutineScope) {
+class Game(private val scope: CoroutineScope) {
     private val mutableState =
         MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7))))
 
+    private val mutex = Mutex()
     val state:Flow<State> = mutableState
 
     var move = Pair(1, 0)
+        set(value) {
+            scope.launch {
+                mutex.withLock {
+                    field = value
+                }
+            }
+        }
 
     init {
         scope.launch {
@@ -53,12 +64,26 @@ class Game(scope: CoroutineScope) {
                 delay(150)
                 mutableState.update {
                     val newPosition = it.snake.first().let { pos ->
-                        Pair(
-                            (pos.first + move.first + BOARD_SIZE) % BOARD_SIZE,
-                            (pos.second + move.second + BOARD_SIZE) % BOARD_SIZE
-                        )
+                        mutex.withLock {
+                            Pair(
+                                (pos.first + move.first + BOARD_SIZE) % BOARD_SIZE,
+                                (pos.second + move.second + BOARD_SIZE) % BOARD_SIZE
+                            )
+                        }
+                    }
+
+                    if (newPosition == it.food) {
+                        snakeLength++
+                    }
+
+                    if (it.snake.contains(newPosition)) {
+                        snakeLength = 4
                     }
                     it.copy(
+                        food = if (newPosition == it.food) Pair(
+                            Random.nextInt(BOARD_SIZE),
+                            Random.nextInt(BOARD_SIZE)
+                        ) else it.food,
                         snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
                     )
                 }
