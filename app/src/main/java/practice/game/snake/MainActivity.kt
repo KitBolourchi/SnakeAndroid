@@ -159,5 +159,5 @@ fun Board(state: State) {
 @Preview(showBackground = true)
 @Composable
 fun SnakeGamePreview() {
-    Snake()
+//    Snake()
 }
