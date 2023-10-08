@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
@@ -121,8 +122,19 @@ fun Snake(game: Game) {
         state.value?.let {
             Board(it)
         }
+        Buttons()
     }
 
+}
+
+@Composable
+fun Buttons(onDirectionChange: (Pair<Int, Int>)-> Unit) {
+    val buttonSize = Modifier.size(64.dp)
+    Column(horizontalAlignment =  Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+        Button(onClick = { onDirectionChange }) {
+            
+        }
+    }
 }
 
 @Composable
@@ -136,10 +148,11 @@ fun Board(state: State) {
                 .border(2.dp, DarkGreen)
         )
         
-        Box(Modifier
-            .offset(x = tileSize * state.food.first, y = tileSize * state.food.second)
-            .size(tileSize)
-            .background(DarkGreen, CircleShape)
+        Box(
+            Modifier
+                .offset(x = tileSize * state.food.first, y = tileSize * state.food.second)
+                .size(tileSize)
+                .background(DarkGreen, CircleShape)
         )
 
         state.snake.forEach {
@@ -147,8 +160,7 @@ fun Board(state: State) {
                 modifier = Modifier
                     .offset(x = tileSize * it.first, y = tileSize * it.second)
                     .size(tileSize)
-                    .background(DarkGreen, Shapes.small
-                    )
+                    .background(DarkGreen, Shapes.small)
             )
         }
 
